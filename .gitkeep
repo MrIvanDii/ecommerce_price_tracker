@@ -1,3 +1,0 @@
-mkdir -p data/input data/output logs src
-touch data/input/.gitkeep data/output/.gitkeep logs/.gitkeep
-touch README.md requirements.txt
