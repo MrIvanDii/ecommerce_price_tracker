@@ -1,0 +1,27 @@
+# Virtual environments
+venv/
+.venv/
+
+# IDE
+.idea/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+
+# Secrets / credentials
+*.json
+
+# Local data
+data/input/*
+!data/input/.gitkeep
+
+data/output/*
+!data/output/.gitkeep
+
+# Logs
+logs/*
+!logs/.gitkeep
