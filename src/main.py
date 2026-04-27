@@ -1,5 +1,4 @@
 from pprint import pprint
-from typing import List, Dict
 
 from src.config import LOG_PATH, LATEST_OUTPUT_PATH, HISTORY_OUTPUT_PATH
 from src.logger import setup_logger
@@ -7,20 +6,7 @@ from src.sources import UKBULLION_LISTING_URLS
 from src.scraper.fetcher import fetch_html
 from src.scraper.ukbullion_parser import parse_ukbullion_listing
 from src.output.csv_writer import write_records_to_csv, append_records_to_csv
-
-
-def deduplicate_by_product_url(records: List[Dict]) -> List[Dict]:
-    unique_records = {}
-
-    for record in records:
-        product_url = record.get("product_url")
-
-        if not product_url:
-            continue
-
-        unique_records[product_url] = record
-
-    return list(unique_records.values())
+from src.processing.deduplicator import deduplicate_by_product_url
 
 
 def main() -> None:
