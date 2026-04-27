@@ -29,3 +29,6 @@ data/output/*
 # Logs
 logs/*
 !logs/.gitkeep
+
+secrets/
+*.json

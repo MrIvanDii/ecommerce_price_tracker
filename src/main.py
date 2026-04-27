@@ -1,20 +1,19 @@
 import time
 from pprint import pprint
 
-from src.config import LOG_PATH, LATEST_OUTPUT_PATH, HISTORY_OUTPUT_PATH
-from src.logger import setup_logger
-from src.sources import UKBULLION_LISTING_URLS
-from src.scraper.fetcher import fetch_html
-from src.scraper.ukbullion_parser import parse_ukbullion_listing
-from src.processing.deduplicator import deduplicate_by_product_url
-from src.output.csv_writer import write_records_to_csv, append_records_to_csv
-
 from src.config import (
     LOG_PATH,
     LATEST_OUTPUT_PATH,
     HISTORY_OUTPUT_PATH,
     REQUEST_DELAY_SECONDS,
 )
+from src.logger import setup_logger
+from src.sources import UKBULLION_LISTING_URLS
+from src.scraper.fetcher import fetch_html
+from src.scraper.ukbullion_parser import parse_ukbullion_listing
+from src.processing.deduplicator import deduplicate_by_product_url
+from src.output.csv_writer import write_records_to_csv, append_records_to_csv
+from src.output.google_sheets import write_latest_prices, append_price_history
 
 
 def main() -> None:
@@ -57,6 +56,11 @@ def main() -> None:
 
     write_records_to_csv(unique_records, LATEST_OUTPUT_PATH)
     append_records_to_csv(unique_records, HISTORY_OUTPUT_PATH)
+
+    logger.info("Writing records to Google Sheets")
+    write_latest_prices(unique_records)
+    append_price_history(unique_records)
+    logger.info("Google Sheets updated successfully")
 
     logger.info("Pipeline summary")
     logger.info(f"Total pages: {total_pages}")
