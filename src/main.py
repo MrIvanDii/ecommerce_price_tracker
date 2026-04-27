@@ -9,11 +9,16 @@ from src.scraper.ukbullion_parser import parse_ukbullion_listing
 from src.processing.deduplicator import deduplicate_by_product_url
 from src.output.csv_writer import write_records_to_csv, append_records_to_csv
 
+from src.config import (
+    LOG_PATH,
+    LATEST_OUTPUT_PATH,
+    HISTORY_OUTPUT_PATH,
+    REQUEST_DELAY_SECONDS,
+)
+
 
 def main() -> None:
     logger = setup_logger(LOG_PATH)
-
-    REQUEST_DELAY_SECONDS = 1
 
     logger.info("Pipeline started")
 

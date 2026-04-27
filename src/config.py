@@ -12,3 +12,5 @@ LATEST_OUTPUT_PATH = (
 HISTORY_OUTPUT_PATH = (
     PROJECT_ROOT / "data" / "output" / "ukbullion_price_history.csv"
 )
+
+REQUEST_DELAY_SECONDS = 1
