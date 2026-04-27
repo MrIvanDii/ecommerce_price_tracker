@@ -1,3 +1,4 @@
+import time
 from pprint import pprint
 
 from src.config import LOG_PATH, LATEST_OUTPUT_PATH, HISTORY_OUTPUT_PATH
@@ -5,12 +6,14 @@ from src.logger import setup_logger
 from src.sources import UKBULLION_LISTING_URLS
 from src.scraper.fetcher import fetch_html
 from src.scraper.ukbullion_parser import parse_ukbullion_listing
-from src.output.csv_writer import write_records_to_csv, append_records_to_csv
 from src.processing.deduplicator import deduplicate_by_product_url
+from src.output.csv_writer import write_records_to_csv, append_records_to_csv
 
 
 def main() -> None:
     logger = setup_logger(LOG_PATH)
+
+    REQUEST_DELAY_SECONDS = 1
 
     logger.info("Pipeline started")
 
@@ -41,6 +44,9 @@ def main() -> None:
             logger.error(
                 f"Failed to process listing page: {listing_url} | Error: {exc}"
             )
+
+        finally:
+            time.sleep(REQUEST_DELAY_SECONDS)
 
     unique_records = deduplicate_by_product_url(all_records)
 
