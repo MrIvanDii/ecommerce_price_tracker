@@ -30,6 +30,11 @@ def main() -> None:
 
     all_records = []
 
+    total_pages = len(UKBULLION_LISTING_URLS)
+    successful_pages = 0
+    empty_pages = 0
+    failed_pages = 0
+
     for listing_url in UKBULLION_LISTING_URLS:
         logger.info(f"Processing listing page: {listing_url}")
 
@@ -37,10 +42,16 @@ def main() -> None:
             html = fetch_html(listing_url)
             records = parse_ukbullion_listing(html, listing_url)
 
-            logger.info(f"Records found: {len(records)}")
-            all_records.extend(records)
+            if records:
+                successful_pages += 1
+                logger.info(f"Records found: {len(records)}")
+                all_records.extend(records)
+            else:
+                empty_pages += 1
+                logger.warning(f"No records found for listing page: {listing_url}")
 
         except Exception as exc:
+            failed_pages += 1
             logger.error(
                 f"Failed to process listing page: {listing_url} | Error: {exc}"
             )
@@ -50,6 +61,11 @@ def main() -> None:
     write_records_to_csv(unique_records, LATEST_OUTPUT_PATH)
     append_records_to_csv(unique_records, HISTORY_OUTPUT_PATH)
 
+    logger.info("Pipeline summary")
+    logger.info(f"Total pages: {total_pages}")
+    logger.info(f"Successful pages: {successful_pages}")
+    logger.info(f"Empty pages: {empty_pages}")
+    logger.info(f"Failed pages: {failed_pages}")
     logger.info(f"Total raw records parsed: {len(all_records)}")
     logger.info(f"Unique records saved: {len(unique_records)}")
     logger.info(f"Latest CSV saved to: {LATEST_OUTPUT_PATH}")
