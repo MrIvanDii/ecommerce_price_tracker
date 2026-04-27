@@ -7,18 +7,22 @@ venv/
 
 # Python cache
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
 
 # Environment variables
 .env
 
 # Secrets / credentials
-*.json
+credentials.json
+service_account.json
 
-# Local data
+# Local data (input)
 data/input/*
+!data/input/products.csv
 !data/input/.gitkeep
 
+# Local data (output)
 data/output/*
 !data/output/.gitkeep
 
