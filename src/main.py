@@ -14,6 +14,7 @@ from src.scraper.ukbullion_parser import parse_ukbullion_listing
 from src.processing.deduplicator import deduplicate_by_product_url
 from src.output.csv_writer import write_records_to_csv, append_records_to_csv
 from src.output.google_sheets import write_latest_prices, append_price_history
+from src.processing.validator import validate_records
 
 
 def main() -> None:
@@ -54,12 +55,14 @@ def main() -> None:
 
     unique_records = deduplicate_by_product_url(all_records)
 
-    write_records_to_csv(unique_records, LATEST_OUTPUT_PATH)
-    append_records_to_csv(unique_records, HISTORY_OUTPUT_PATH)
+    validated_records = validate_records(unique_records)
+
+    write_records_to_csv(validated_records, LATEST_OUTPUT_PATH)
+    append_records_to_csv(validated_records, HISTORY_OUTPUT_PATH)
 
     logger.info("Writing records to Google Sheets")
-    write_latest_prices(unique_records)
-    append_price_history(unique_records)
+    write_latest_prices(validated_records)
+    append_price_history(validated_records)
     logger.info("Google Sheets updated successfully")
 
     logger.info("Pipeline summary")
@@ -68,7 +71,7 @@ def main() -> None:
     logger.info(f"Empty pages: {empty_pages}")
     logger.info(f"Failed pages: {failed_pages}")
     logger.info(f"Total raw records parsed: {len(all_records)}")
-    logger.info(f"Unique records saved: {len(unique_records)}")
+    logger.info(f"Unique records saved: {len(validated_records)}")
     logger.info(f"Latest CSV saved to: {LATEST_OUTPUT_PATH}")
     logger.info(f"History CSV updated at: {HISTORY_OUTPUT_PATH}")
     logger.info("Pipeline finished")
@@ -76,7 +79,7 @@ def main() -> None:
     print()
     print("Sample records:")
 
-    for record in unique_records[:5]:
+    for record in validated_records[:5]:
         pprint(record)
         print("-" * 80)
 
