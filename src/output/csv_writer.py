@@ -7,6 +7,7 @@ FIELDNAMES = [
     "timestamp",
     "dealer",
     "listing_url",
+    "source_category",
     "product_name",
     "product_name_clean",
     "year",

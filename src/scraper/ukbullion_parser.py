@@ -3,6 +3,7 @@ import re
 from typing import List, Dict, Optional
 
 from bs4 import BeautifulSoup
+from src.processing.source_metadata import extract_source_category
 
 from src.processing.cleaner import (
     clean_text,
@@ -90,10 +91,12 @@ def parse_product_card_from_more_info_link(link, listing_url: str) -> Optional[D
         scrape_status = "failed"
         error_message = "Could not extract core product fields."
 
+    source_category = extract_source_category(listing_url)
     return {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "dealer": "ukbullion",
         "listing_url": listing_url,
+        "source_category": source_category,
         "product_name": product_name,
         "product_name_clean": product_name_clean,
         "year": metadata["year"],
