@@ -16,3 +16,7 @@ UKBULLION_LISTING_URLS = [
     "https://www.ukbullion.com/gold/buy-gold-coins/gold-others.html",
     "https://www.ukbullion.com/gold/buy-gold-coins/24ct-gold-coins-9999.html",
 ]
+
+BULLIONBYPOST_LISTING_URLS = [
+    "https://www.bullionbypost.co.uk/gold-coins/britannia-1oz-gold-coin/",
+]
