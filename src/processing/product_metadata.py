@@ -10,6 +10,29 @@ def extract_year(product_name: str) -> Optional[str]:
     return match.group(1)
 
 
+def normalize_product_name(product_name: Optional[str]) -> Optional[str]:
+    if not product_name:
+        return None
+
+    name = product_name
+
+    replacements = {
+        "1 4Oz": "1/4oz",
+        "1 2Oz": "1/2oz",
+        "1 10Oz": "1/10oz",
+        "1Oz": "1oz",
+        "Oz": "oz",
+        "Kc3": "KC3",
+        "9167": "916.7",
+        "9999": "999.9",
+    }
+
+    for old, new in replacements.items():
+        name = name.replace(old, new)
+
+    return " ".join(name.split()).strip()
+
+
 def extract_weight(product_name: str) -> Optional[str]:
     text = product_name.lower()
 

@@ -12,7 +12,10 @@ from src.processing.cleaner import (
     make_absolute_url,
 )
 
-from src.processing.product_metadata import extract_product_metadata
+from src.processing.product_metadata import (
+    extract_product_metadata,
+    normalize_product_name,
+)
 
 
 def parse_ukbullion_listing(html: str, listing_url: str) -> List[Dict]:
@@ -69,6 +72,7 @@ def parse_product_card_from_more_info_link(link, listing_url: str) -> Optional[D
     if not product_name:
         product_name = extract_product_name_from_url(product_url)
         metadata = extract_product_metadata(product_name)
+        product_name_clean = normalize_product_name(product_name)
 
     raw_price_text = extract_1_plus_price(parent_text)
     raw_availability = extract_availability(parent_text)
@@ -91,6 +95,7 @@ def parse_product_card_from_more_info_link(link, listing_url: str) -> Optional[D
         "dealer": "ukbullion",
         "listing_url": listing_url,
         "product_name": product_name,
+        "product_name_clean": product_name_clean,
         "year": metadata["year"],
         "weight": metadata["weight"],
         "coin_family": metadata["coin_family"],

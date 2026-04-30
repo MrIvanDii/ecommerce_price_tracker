@@ -23,6 +23,7 @@ FIELDNAMES = [
     "dealer",
     "listing_url",
     "product_name",
+    "product_name_clean",
     "year",
     "weight",
     "coin_family",
