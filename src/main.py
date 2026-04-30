@@ -8,7 +8,6 @@ from src.config import (
 )
 from src.logger import setup_logger
 from src.sources_registry import SOURCES
-from src.scraper.fetcher import fetch_html
 from src.processing.deduplicator import deduplicate_by_product_url
 from src.processing.validator import validate_records
 from src.output.csv_writer import write_records_to_csv, append_records_to_csv
@@ -31,6 +30,7 @@ def main() -> None:
     for source in SOURCES:
         source_name = source["name"]
         listing_urls = source["listing_urls"]
+        fetcher = source["fetcher"]
         parser = source["parser"]
 
         logger.info(f"Processing source: {source_name}")
@@ -40,7 +40,7 @@ def main() -> None:
             logger.info(f"Processing listing page: {listing_url}")
 
             try:
-                html = fetch_html(listing_url)
+                html = fetcher(listing_url)
                 records = parser(html, listing_url)
 
                 if records:

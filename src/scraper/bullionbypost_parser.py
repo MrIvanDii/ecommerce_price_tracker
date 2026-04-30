@@ -18,15 +18,68 @@ from src.processing.product_metadata import (
 from src.processing.source_metadata import extract_source_category
 
 
+def parse_product_card(card, listing_url: str) -> Optional[Dict]:
+    card_text = clean_text(card.get_text(" ", strip=True))
+
+    link = card.select_one("a[href]")
+    if not link:
+        return None
+
+    product_url = make_absolute_url(listing_url, link.get("href"))
+
+    product_name = extract_product_name_from_block(card_text)
+
+    if not product_name or product_name.lower() in ["in stock", "awaiting stock", "out of stock"]:
+        product_name = extract_product_name_from_url(product_url)
+
+    product_name_clean = normalize_product_name(product_name)
+    metadata = extract_product_metadata(product_name_clean)
+
+    raw_price_text = extract_from_price(card_text)
+    raw_availability = extract_availability(card_text)
+
+    price = extract_price_from_text(raw_price_text)
+    currency = detect_currency(raw_price_text)
+
+    if product_name and raw_price_text and price is not None:
+        scrape_status = "success"
+        error_message = None
+    elif product_name and (raw_price_text or raw_availability):
+        scrape_status = "partial"
+        error_message = "Partial card extraction."
+    else:
+        scrape_status = "failed"
+        error_message = "Could not extract core product fields."
+
+    return {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "dealer": "bullionbypost",
+        "listing_url": listing_url,
+        "source_category": extract_source_category(listing_url),
+        "product_name": product_name,
+        "product_name_clean": product_name_clean,
+        "year": metadata["year"],
+        "weight": metadata["weight"],
+        "coin_family": metadata["coin_family"],
+        "product_url": product_url,
+        "price": price,
+        "currency": currency,
+        "availability": normalize_availability(raw_availability),
+        "raw_price_text": raw_price_text,
+        "scrape_status": scrape_status,
+        "error_message": error_message,
+    }
+
+
 def parse_bullionbypost_listing(html: str, listing_url: str) -> List[Dict]:
     soup = BeautifulSoup(html, "html.parser")
     records = []
 
-    buy_links = soup.find_all("a", string=lambda s: s and "Buy" in s)
+    product_cards = soup.select("div.card.product-module")
 
-    for link in buy_links:
+    for card in product_cards:
         try:
-            record = parse_product_card_from_buy_link(link, listing_url)
+            record = parse_product_card(card, listing_url)
 
             if record:
                 records.append(record)
@@ -73,7 +126,7 @@ def parse_product_card_from_buy_link(link, listing_url: str) -> Optional[Dict]:
 
     product_name = extract_product_name_from_block(card_text)
 
-    if not product_name:
+    if not product_name or product_name.lower() in ["in stock", "awaiting stock", "out of stock"]:
         product_name = extract_product_name_from_url(product_url)
 
     product_name_clean = normalize_product_name(product_name)
@@ -136,7 +189,27 @@ def extract_product_name_from_block(block_text: str) -> Optional[str]:
 def extract_product_name_from_url(product_url: str) -> Optional[str]:
     slug = product_url.rstrip("/").split("/")[-1]
     slug = slug.replace("-", " ")
-    return clean_text(slug).title()
+
+    replacements = {
+        "1oz": "1oz",
+        "2026": "2026",
+        "2025": "2025",
+        "britannia": "Britannia",
+        "gold": "Gold",
+        "coin": "Coin",
+        "coins": "Coins",
+        "tube": "Tube",
+        "one ounce": "1oz",
+    }
+
+    name = clean_text(slug).title()
+
+    name = name.replace("1Oz", "1oz")
+    name = name.replace("Britannia", "Britannia")
+    name = name.replace("Gold", "Gold")
+    name = name.replace("Coin", "Coin")
+
+    return name
 
 
 def extract_from_price(block_text: str) -> Optional[str]:
