@@ -12,9 +12,9 @@ from src.sources import UKBULLION_LISTING_URLS
 from src.scraper.fetcher import fetch_html
 from src.scraper.ukbullion_parser import parse_ukbullion_listing
 from src.processing.deduplicator import deduplicate_by_product_url
+from src.processing.validator import validate_records
 from src.output.csv_writer import write_records_to_csv, append_records_to_csv
 from src.output.google_sheets import write_latest_prices, append_price_history
-from src.processing.validator import validate_records
 
 
 def main() -> None:
@@ -53,9 +53,16 @@ def main() -> None:
         finally:
             time.sleep(REQUEST_DELAY_SECONDS)
 
-    unique_records = deduplicate_by_product_url(all_records)
+    # -------------------------
+    # Processing pipeline
+    # -------------------------
 
+    unique_records = deduplicate_by_product_url(all_records)
     validated_records = validate_records(unique_records)
+
+    # -------------------------
+    # Save outputs
+    # -------------------------
 
     write_records_to_csv(validated_records, LATEST_OUTPUT_PATH)
     append_records_to_csv(validated_records, HISTORY_OUTPUT_PATH)
@@ -64,6 +71,10 @@ def main() -> None:
     write_latest_prices(validated_records)
     append_price_history(validated_records)
     logger.info("Google Sheets updated successfully")
+
+    # -------------------------
+    # Pipeline summary
+    # -------------------------
 
     logger.info("Pipeline summary")
     logger.info(f"Total pages: {total_pages}")
@@ -74,7 +85,31 @@ def main() -> None:
     logger.info(f"Unique records saved: {len(validated_records)}")
     logger.info(f"Latest CSV saved to: {LATEST_OUTPUT_PATH}")
     logger.info(f"History CSV updated at: {HISTORY_OUTPUT_PATH}")
+
+    # -------------------------
+    # Data quality summary ⭐
+    # -------------------------
+
+    success_count = sum(
+        1 for r in validated_records if r.get("scrape_status") == "success"
+    )
+    partial_count = sum(
+        1 for r in validated_records if r.get("scrape_status") == "partial"
+    )
+    failed_count = sum(
+        1 for r in validated_records if r.get("scrape_status") == "failed"
+    )
+
+    logger.info("Data quality summary")
+    logger.info(f"Successful records: {success_count}")
+    logger.info(f"Partial records: {partial_count}")
+    logger.info(f"Failed records: {failed_count}")
+
     logger.info("Pipeline finished")
+
+    # -------------------------
+    # Debug output
+    # -------------------------
 
     print()
     print("Sample records:")
