@@ -7,9 +7,8 @@ from src.config import (
     REQUEST_DELAY_SECONDS,
 )
 from src.logger import setup_logger
-from src.sources import UKBULLION_LISTING_URLS
+from src.sources_registry import SOURCES
 from src.scraper.fetcher import fetch_html
-from src.scraper.ukbullion_parser import parse_ukbullion_listing
 from src.processing.deduplicator import deduplicate_by_product_url
 from src.processing.validator import validate_records
 from src.output.csv_writer import write_records_to_csv, append_records_to_csv
@@ -23,45 +22,48 @@ def main() -> None:
 
     all_records = []
 
-    total_pages = len(UKBULLION_LISTING_URLS)
+    total_sources = len(SOURCES)
+    total_pages = 0
     successful_pages = 0
     empty_pages = 0
     failed_pages = 0
 
-    for listing_url in UKBULLION_LISTING_URLS:
-        logger.info(f"Processing listing page: {listing_url}")
+    for source in SOURCES:
+        source_name = source["name"]
+        listing_urls = source["listing_urls"]
+        parser = source["parser"]
 
-        try:
-            html = fetch_html(listing_url)
-            records = parse_ukbullion_listing(html, listing_url)
+        logger.info(f"Processing source: {source_name}")
 
-            if records:
-                successful_pages += 1
-                logger.info(f"Records found: {len(records)}")
-                all_records.extend(records)
-            else:
-                empty_pages += 1
-                logger.warning(f"No records found for listing page: {listing_url}")
+        for listing_url in listing_urls:
+            total_pages += 1
+            logger.info(f"Processing listing page: {listing_url}")
 
-        except Exception as exc:
-            failed_pages += 1
-            logger.error(
-                f"Failed to process listing page: {listing_url} | Error: {exc}"
-            )
+            try:
+                html = fetch_html(listing_url)
+                records = parser(html, listing_url)
 
-        finally:
-            time.sleep(REQUEST_DELAY_SECONDS)
+                if records:
+                    successful_pages += 1
+                    logger.info(f"Records found: {len(records)}")
+                    all_records.extend(records)
+                else:
+                    empty_pages += 1
+                    logger.warning(
+                        f"No records found for listing page: {listing_url}"
+                    )
 
-    # -------------------------
-    # Processing pipeline
-    # -------------------------
+            except Exception as exc:
+                failed_pages += 1
+                logger.error(
+                    f"Failed to process listing page: {listing_url} | Error: {exc}"
+                )
+
+            finally:
+                time.sleep(REQUEST_DELAY_SECONDS)
 
     unique_records = deduplicate_by_product_url(all_records)
     validated_records = validate_records(unique_records)
-
-    # -------------------------
-    # Save outputs
-    # -------------------------
 
     write_records_to_csv(validated_records, LATEST_OUTPUT_PATH)
     append_records_to_csv(validated_records, HISTORY_OUTPUT_PATH)
@@ -70,24 +72,6 @@ def main() -> None:
     write_latest_prices(validated_records)
     append_price_history(validated_records)
     logger.info("Google Sheets updated successfully")
-
-    # -------------------------
-    # Pipeline summary
-    # -------------------------
-
-    logger.info("Pipeline summary")
-    logger.info(f"Total pages: {total_pages}")
-    logger.info(f"Successful pages: {successful_pages}")
-    logger.info(f"Empty pages: {empty_pages}")
-    logger.info(f"Failed pages: {failed_pages}")
-    logger.info(f"Total raw records parsed: {len(all_records)}")
-    logger.info(f"Unique records saved: {len(validated_records)}")
-    logger.info(f"Latest CSV saved to: {LATEST_OUTPUT_PATH}")
-    logger.info(f"History CSV updated at: {HISTORY_OUTPUT_PATH}")
-
-    # -------------------------
-    # Data quality summary ⭐
-    # -------------------------
 
     success_count = sum(
         1 for r in validated_records if r.get("scrape_status") == "success"
@@ -99,16 +83,23 @@ def main() -> None:
         1 for r in validated_records if r.get("scrape_status") == "failed"
     )
 
+    logger.info("Pipeline summary")
+    logger.info(f"Total sources: {total_sources}")
+    logger.info(f"Total pages: {total_pages}")
+    logger.info(f"Successful pages: {successful_pages}")
+    logger.info(f"Empty pages: {empty_pages}")
+    logger.info(f"Failed pages: {failed_pages}")
+    logger.info(f"Total raw records parsed: {len(all_records)}")
+    logger.info(f"Unique records saved: {len(validated_records)}")
+    logger.info(f"Latest CSV saved to: {LATEST_OUTPUT_PATH}")
+    logger.info(f"History CSV updated at: {HISTORY_OUTPUT_PATH}")
+
     logger.info("Data quality summary")
     logger.info(f"Successful records: {success_count}")
     logger.info(f"Partial records: {partial_count}")
     logger.info(f"Failed records: {failed_count}")
 
     logger.info("Pipeline finished")
-
-    # -------------------------
-    # Debug output
-    # -------------------------
 
 
 if __name__ == "__main__":
