@@ -1,5 +1,4 @@
 import time
-from pprint import pprint
 
 from src.config import (
     LOG_PATH,
@@ -110,13 +109,6 @@ def main() -> None:
     # -------------------------
     # Debug output
     # -------------------------
-
-    print()
-    print("Sample records:")
-
-    for record in validated_records[:5]:
-        pprint(record)
-        print("-" * 80)
 
 
 if __name__ == "__main__":
