@@ -15,6 +15,7 @@ FIELDNAMES = [
     "coin_family",
     "product_url",
     "price",
+    "price_per_oz",
     "currency",
     "availability",
     "raw_price_text",

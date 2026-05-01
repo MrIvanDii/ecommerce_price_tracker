@@ -90,3 +90,26 @@ def extract_product_metadata(product_name: Optional[str]) -> Dict[str, Optional[
         "weight": extract_weight(product_name),
         "coin_family": extract_coin_family(product_name),
     }
+
+
+def weight_to_oz(weight: Optional[str]) -> Optional[float]:
+    if not weight:
+        return None
+
+    weight_map = {
+        "1oz": 1.0,
+        "1/2oz": 0.5,
+        "1/4oz": 0.25,
+        "1/10oz": 0.1,
+    }
+
+    return weight_map.get(weight)
+
+
+def calculate_price_per_oz(price: Optional[float], weight: Optional[str]) -> Optional[float]:
+    weight_oz = weight_to_oz(weight)
+
+    if price is None or weight_oz is None or weight_oz == 0:
+        return None
+
+    return round(price / weight_oz, 2)

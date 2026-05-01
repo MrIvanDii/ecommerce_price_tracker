@@ -16,6 +16,7 @@ from src.processing.cleaner import (
 from src.processing.product_metadata import (
     extract_product_metadata,
     normalize_product_name,
+    calculate_price_per_oz,
 )
 
 
@@ -80,6 +81,7 @@ def parse_product_card_from_more_info_link(link, listing_url: str) -> Optional[D
 
     price = extract_price_from_text(raw_price_text)
     currency = detect_currency(raw_price_text)
+    price_per_oz = calculate_price_per_oz(price, metadata["weight"])
 
     if product_name and raw_price_text and price is not None:
         scrape_status = "success"
@@ -104,6 +106,7 @@ def parse_product_card_from_more_info_link(link, listing_url: str) -> Optional[D
         "coin_family": metadata["coin_family"],
         "product_url": product_url,
         "price": price,
+        "price_per_oz": price_per_oz,
         "currency": currency,
         "availability": normalize_availability(raw_availability),
         "raw_price_text": raw_price_text,
