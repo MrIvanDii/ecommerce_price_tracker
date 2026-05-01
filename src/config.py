@@ -17,4 +17,8 @@ BEST_PRICES_OUTPUT_PATH = (
     PROJECT_ROOT / "data" / "output" / "best_prices.csv"
 )
 
+PRICE_SPREAD_OUTPUT_PATH = (
+    PROJECT_ROOT / "data" / "output" / "price_spread.csv"
+)
+
 REQUEST_DELAY_SECONDS = 1

@@ -3,12 +3,15 @@ import time
 from src.config import (
     LOG_PATH,
     LATEST_OUTPUT_PATH,
+    PRICE_SPREAD_OUTPUT_PATH,
     HISTORY_OUTPUT_PATH,
     BEST_PRICES_OUTPUT_PATH,
     REQUEST_DELAY_SECONDS,
 )
 
 from src.analytics.best_prices import find_best_prices
+from src.analytics.price_spread import calculate_price_spreads
+from src.output.analytics_csv_writer import write_price_spreads_to_csv
 
 from src.logger import setup_logger
 from src.sources_registry import SOURCES
@@ -78,7 +81,9 @@ def main() -> None:
     validated_records = validate_records(unique_records)
     best_price_records = find_best_prices(validated_records)
 
+    price_spread_records = calculate_price_spreads(validated_records)
     write_records_to_csv(validated_records, LATEST_OUTPUT_PATH)
+    write_price_spreads_to_csv(price_spread_records, PRICE_SPREAD_OUTPUT_PATH)
     append_records_to_csv(validated_records, HISTORY_OUTPUT_PATH)
 
     write_records_to_csv(best_price_records, BEST_PRICES_OUTPUT_PATH)
@@ -110,6 +115,8 @@ def main() -> None:
     logger.info(f"Unique records saved: {len(validated_records)}")
     logger.info(f"Latest CSV saved to: {LATEST_OUTPUT_PATH}")
     logger.info(f"History CSV updated at: {HISTORY_OUTPUT_PATH}")
+    logger.info(f"Price spread records saved: {len(price_spread_records)}")
+    logger.info(f"Price spread CSV saved to: {PRICE_SPREAD_OUTPUT_PATH}")
 
     logger.info("Data quality summary")
     logger.info(f"Successful records: {success_count}")
