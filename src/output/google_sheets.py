@@ -54,6 +54,17 @@ def get_gspread_client():
     return gspread.authorize(creds)
 
 
+def write_best_prices(records: List[Dict]) -> None:
+    spreadsheet = get_spreadsheet()
+    worksheet = spreadsheet.worksheet("best_prices")
+
+    worksheet.clear()
+    worksheet.append_row(FIELDNAMES)
+
+    if records:
+        worksheet.append_rows(records_to_rows(records))
+
+
 def get_spreadsheet():
     spreadsheet_id = os.getenv("GOOGLE_SHEETS_SPREADSHEET_ID")
 

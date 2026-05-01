@@ -15,7 +15,11 @@ from src.sources_registry import SOURCES
 from src.processing.deduplicator import deduplicate_by_product_url
 from src.processing.validator import validate_records
 from src.output.csv_writer import write_records_to_csv, append_records_to_csv
-from src.output.google_sheets import write_latest_prices, append_price_history
+from src.output.google_sheets import (
+    write_latest_prices,
+    append_price_history,
+    write_best_prices,
+)
 
 
 def main() -> None:
@@ -83,6 +87,7 @@ def main() -> None:
     logger.info("Writing records to Google Sheets")
     write_latest_prices(validated_records)
     append_price_history(validated_records)
+    write_best_prices(best_price_records)
     logger.info("Google Sheets updated successfully")
 
     success_count = sum(
