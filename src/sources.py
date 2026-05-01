@@ -19,4 +19,11 @@ UKBULLION_LISTING_URLS = [
 
 BULLIONBYPOST_LISTING_URLS = [
     "https://www.bullionbypost.co.uk/gold-coins/britannia-1oz-gold-coin/",
+    "https://www.bullionbypost.co.uk/britannia-1oz-gold-coin/gold-britannia-1-10oz/",
+    "https://www.bullionbypost.co.uk/britannia-1oz-gold-coin/gold-britannia-1-4oz/",
+    "https://www.bullionbypost.co.uk/britannia-1oz-gold-coin/gold-britannia-1-2oz/",
+    "https://www.bullionbypost.co.uk/gold-coins/full-sovereign-gold-coin/",
+    "https://www.bullionbypost.co.uk/gold-coins/half-sovereign/",
+    "https://www.bullionbypost.co.uk/gold-coins/2026-gold-coins/",
+    "https://www.bullionbypost.co.uk/gold-coins/2025-gold-coins/",
 ]
