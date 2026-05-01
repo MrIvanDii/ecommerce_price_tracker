@@ -29,11 +29,15 @@ def main() -> None:
 
     for source in SOURCES:
         source_name = source["name"]
+        dealer = source["dealer"]
+        fetch_mode = source["fetch_mode"]
         listing_urls = source["listing_urls"]
         fetcher = source["fetcher"]
         parser = source["parser"]
 
-        logger.info(f"Processing source: {source_name}")
+        logger.info(
+            f"Processing source: {source_name} | dealer={dealer} | fetch_mode={fetch_mode}"
+        )
 
         for listing_url in listing_urls:
             total_pages += 1
