@@ -9,28 +9,67 @@ def get_group_key(record: Dict) -> Tuple:
 
 
 def find_best_prices(records: List[Dict]) -> List[Dict]:
-    best_by_group = {}
+    grouped_records = {}
 
     for record in records:
-        price = record.get("price")
         coin_family = record.get("coin_family")
         weight = record.get("weight")
-
-        if price is None:
-            continue
+        price_per_oz = record.get("price_per_oz")
 
         if not coin_family or not weight:
             continue
 
-        group_key = get_group_key(record)
-
-        if group_key not in best_by_group:
-            best_by_group[group_key] = record
+        if price_per_oz is None:
             continue
 
-        current_best = best_by_group[group_key]
+        if record.get("availability") == "out_of_stock":
+            continue
 
-        if price < current_best.get("price"):
-            best_by_group[group_key] = record
+        if should_exclude_from_best_prices(record):
+            continue
 
-    return list(best_by_group.values())
+        group_key = get_group_key(record)
+
+        if group_key not in grouped_records:
+            grouped_records[group_key] = []
+
+        grouped_records[group_key].append(record)
+
+    best_price_records = []
+
+    for group_key, group_records in grouped_records.items():
+        best_record = min(
+            group_records,
+            key=lambda r: r.get("price_per_oz"),
+        )
+
+        best_price_records.append(best_record)
+
+    return best_price_records
+
+
+def should_exclude_from_best_prices(record: Dict) -> bool:
+    product_name = (record.get("product_name_clean") or "").lower()
+
+    excluded_keywords = [
+        "empty tube",
+        "tube",
+        "pack",
+        "lot",
+        "bundle",
+        "box of",
+        "proof",
+        "ngc",
+        "pcgs",
+        "pf70",
+        "pf69",
+        "ms70",
+        "ms69",
+        "graded",
+        "boxed",
+        "gift boxed",
+        "limited edition",
+        "commemorative",
+    ]
+
+    return any(keyword in product_name for keyword in excluded_keywords)
