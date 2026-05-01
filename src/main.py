@@ -4,8 +4,12 @@ from src.config import (
     LOG_PATH,
     LATEST_OUTPUT_PATH,
     HISTORY_OUTPUT_PATH,
+    BEST_PRICES_OUTPUT_PATH,
     REQUEST_DELAY_SECONDS,
 )
+
+from src.analytics.best_prices import find_best_prices
+
 from src.logger import setup_logger
 from src.sources_registry import SOURCES
 from src.processing.deduplicator import deduplicate_by_product_url
@@ -68,10 +72,14 @@ def main() -> None:
 
     unique_records = deduplicate_by_product_url(all_records)
     validated_records = validate_records(unique_records)
+    best_price_records = find_best_prices(validated_records)
 
     write_records_to_csv(validated_records, LATEST_OUTPUT_PATH)
     append_records_to_csv(validated_records, HISTORY_OUTPUT_PATH)
 
+    write_records_to_csv(best_price_records, BEST_PRICES_OUTPUT_PATH)
+    logger.info(f"Best price records saved: {len(best_price_records)}")
+    logger.info(f"Best prices CSV saved to: {BEST_PRICES_OUTPUT_PATH}")
     logger.info("Writing records to Google Sheets")
     write_latest_prices(validated_records)
     append_price_history(validated_records)
