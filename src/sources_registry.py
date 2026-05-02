@@ -16,12 +16,12 @@ SOURCES = [
         "fetcher": fetch_html,
         "parser": parse_ukbullion_listing,
     },
-    {
-        "name": "BullionByPost",
-        "dealer": "bullionbypost",
-        "fetch_mode": "browser",
-        "listing_urls": BULLIONBYPOST_LISTING_URLS,
-        "fetcher": fetch_html_with_browser,
-        "parser": parse_bullionbypost_listing,
-    },
+    # {
+    #     "name": "BullionByPost",
+    #     "dealer": "bullionbypost",
+    #     "fetch_mode": "browser",
+    #     "listing_urls": BULLIONBYPOST_LISTING_URLS,
+    #     "fetcher": fetch_html_with_browser,
+    #     "parser": parse_bullionbypost_listing,
+    # },
 ]
