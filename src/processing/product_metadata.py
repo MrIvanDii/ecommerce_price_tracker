@@ -6,7 +6,6 @@ def extract_year(product_name: str) -> Optional[str]:
     match = re.search(r"\b(20\d{2}|19\d{2})\b", product_name)
     if not match:
         return None
-
     return match.group(1)
 
 
@@ -36,21 +35,43 @@ def normalize_product_name(product_name: Optional[str]) -> Optional[str]:
 def extract_weight(product_name: str) -> Optional[str]:
     text = product_name.lower()
 
-    weight_patterns = [
+    # --- Граммы (проверяем первыми чтобы не конфликтовали с oz) ---
+    gram_match = re.search(r"\b(\d+(?:\.\d+)?)\s*g\b", text)
+    if gram_match:
+        grams = float(gram_match.group(1))
+        return f"{grams}g"
+
+    # --- Стандартные oz паттерны ---
+    oz_patterns = [
+        (r"\b1\s*2\s*ounce\b", "1/2oz"),  # "1 2 Ounce" после normalize
+        (r"\b1\s*ounce\b", "1oz"),  # "1 Ounce"
+        (r"\bone[\s-]ounce\b", "1oz"),  # "one ounce" → 1oz
+        (r"\bone[\s-]oz\b", "1oz"),  # "one oz" → 1oz
+        (r"\b1\s*/\s*10\s*oz\b", "1/10oz"),
+        (r"\b1\s*10\s*oz\b", "1/10oz"),  # "1 10Oz" после normalize
+        (r"\btenth[\s-]ounce\b", "1/10oz"),
+        (r"\b1\s*/\s*4\s*oz\b", "1/4oz"),
+        (r"\b1\s*4\s*oz\b", "1/4oz"),  # "1 4Oz" после normalize
+        (r"\bquarter[\s-]ounce\b", "1/4oz"),
+        (r"\b1\s*/\s*2\s*oz\b", "1/2oz"),
+        (r"\b1\s*2\s*oz\b", "1/2oz"),  # "1 2Oz" после normalize
+        (r"\bhalf[\s-]oz\b", "1/2oz"),
+        (r"\bhalf[\s-]ounce\b", "1/2oz"),
         (r"\b1\s*oz\b", "1oz"),
-        (r"\b1/2\s*oz\b", "1/2oz"),
-        (r"\b1\s*2oz\b", "1/2oz"),
-        (r"\bhalf\s*ounce\b", "1/2oz"),
-        (r"\b1/4\s*oz\b", "1/4oz"),
-        (r"\b1\s*4oz\b", "1/4oz"),
-        (r"\bquarter\s*ounce\b", "1/4oz"),
-        (r"\b1/10\s*oz\b", "1/10oz"),
-        (r"\btenth\s*ounce\b", "1/10oz"),
     ]
 
-    for pattern, normalized_value in weight_patterns:
+    for pattern, normalized in oz_patterns:
         if re.search(pattern, text):
-            return normalized_value
+            return normalized
+
+    # --- Sovereign весa (после oz чтобы не конфликтовали) ---
+    # Порядок важен: double > half > full/обычный
+    if re.search(r"\bdouble[\s-]sovereign\b", text):
+        return "2sovereign"
+    if re.search(r"\bhalf[\s-]sovereign\b", text):
+        return "1/2sovereign"
+    if re.search(r"\bfull[\s-]sovereign\b", text) or re.search(r"\bsovereign\b", text):
+        return "1sovereign"
 
     return None
 
@@ -58,36 +79,35 @@ def extract_weight(product_name: str) -> Optional[str]:
 def extract_coin_family(product_name: str) -> Optional[str]:
     text = product_name.lower()
 
+    # Eagle — только американский, не британский "Lion and the Eagle"
+    if any(k in text for k in ["american eagle", "us eagle", "usa eagle"]):
+        return "eagle"
+
     families = {
-        "britannia": "britannia",
-        "krugerrand": "krugerrand",
-        "sovereign": "sovereign",
-        "maple": "maple_leaf",
-        "maple leaf": "maple_leaf",
-        "eagle": "eagle",
-        "kangaroo": "kangaroo",
-        "panda": "panda",
+        "britannia":    "britannia",
+        "krugerrand":   "krugerrand",
+        "sovereign":    "sovereign",
+        "maple leaf":   "maple_leaf",
+        "maple":        "maple_leaf",
+        "kangaroo":     "kangaroo",
+        "panda":        "panda",
         "philharmonic": "philharmonic",
     }
 
-    for keyword, normalized_value in families.items():
+    for keyword, normalized in families.items():
         if keyword in text:
-            return normalized_value
+            return normalized
 
     return None
 
 
 def extract_product_metadata(product_name: Optional[str]) -> Dict[str, Optional[str]]:
     if not product_name:
-        return {
-            "year": None,
-            "weight": None,
-            "coin_family": None,
-        }
+        return {"year": None, "weight": None, "coin_family": None}
 
     return {
-        "year": extract_year(product_name),
-        "weight": extract_weight(product_name),
+        "year":        extract_year(product_name),
+        "weight":      extract_weight(product_name),
         "coin_family": extract_coin_family(product_name),
     }
 
@@ -97,13 +117,26 @@ def weight_to_oz(weight: Optional[str]) -> Optional[float]:
         return None
 
     weight_map = {
-        "1oz": 1.0,
-        "1/2oz": 0.5,
-        "1/4oz": 0.25,
-        "1/10oz": 0.1,
+        "1oz":          1.0,
+        "1/2oz":        0.5,
+        "1/4oz":        0.25,
+        "1/10oz":       0.1,
+        # Sovereigns
+        "1sovereign":   0.2354,
+        "1/2sovereign": 0.1177,
+        "2sovereign":   0.4708,
     }
 
-    return weight_map.get(weight)
+    if weight in weight_map:
+        return weight_map[weight]
+
+    # Граммы вида "30g", "15g", "8g"
+    gram_match = re.match(r"^(\d+(?:\.\d+)?)g$", weight)
+    if gram_match:
+        grams = float(gram_match.group(1))
+        return round(grams / 31.1035, 6)
+
+    return None
 
 
 def calculate_price_per_oz(price: Optional[float], weight: Optional[str]) -> Optional[float]:

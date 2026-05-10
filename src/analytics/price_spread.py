@@ -9,34 +9,49 @@ def get_group_key(record: Dict) -> Tuple:
 
 
 def should_exclude_from_price_spread(record: Dict) -> bool:
-    product_name = (record.get("product_name_clean") or "").lower()
+    product_name = (
+            (record.get("product_name") or "") + " " +
+            (record.get("product_name_clean") or "")
+    ).lower()
 
     excluded_keywords = [
-        # Bulk products
+        # Bulk / multi-coin
         "tube",
+        "box of",
+        "bundle",
         "pack",
         "lot",
-        "bundle",
-        "box of",
-        "collection",
+        # Sets / collections
         "set",
-        "privy",
-        "pre-owned",
-        "pre owned",
-
-        # Premium / collectible / graded products
+        "collection",
+        # Premium / proof / graded
         "proof",
+        "graded",
+        "boxed",
         "ngc",
         "pcgs",
         "pf70",
         "pf69",
         "ms70",
         "ms69",
-        "graded",
-        "boxed",
-        "gift boxed",
+        # Pre-owned
+        "pre-owned",
+        "pre owned",
+        # Special editions
+        "privy",
         "limited edition",
         "commemorative",
+        # Accessories / non-coins
+        "display box",
+        "gift box",
+        "presentation card",
+        "empty tube",
+        "peli",
+        # Specific non-standard coins
+        "barbie",
+        "francs",
+        "st gaudens",
+        "corona",
     ]
 
     return any(keyword in product_name for keyword in excluded_keywords)
