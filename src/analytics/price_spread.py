@@ -18,6 +18,11 @@ def should_exclude_from_price_spread(record: Dict) -> bool:
         "lot",
         "bundle",
         "box of",
+        "collection",
+        "set",
+        "privy",
+        "pre-owned",
+        "pre owned",
 
         # Premium / collectible / graded products
         "proof",

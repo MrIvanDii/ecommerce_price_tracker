@@ -27,3 +27,10 @@ BULLIONBYPOST_LISTING_URLS = [
     "https://www.bullionbypost.co.uk/gold-coins/2026-gold-coins/",
     "https://www.bullionbypost.co.uk/gold-coins/2025-gold-coins/",
 ]
+
+ATKINSONS_LISTING_URLS = [
+    "https://atkinsonsbullion.com/gold/gold-coins",
+    "https://atkinsonsbullion.com/gold/gold-coins/1oz-gold-coins",
+    "https://atkinsonsbullion.com/gold/gold-coins/britannia",
+    "https://atkinsonsbullion.com/gold/gold-coins/gold-sovereign-coins",
+]
