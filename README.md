@@ -1,3 +1,11 @@
+## Preview
+
+![Google Sheets](docs/google_sheets_preview.png)
+![Google Sheets](docs/google_sheets_preview_1.png)
+![Google Sheets](docs/google_sheets_preview_2.png)
+![Google Sheets](docs/prices_sample_1.png)
+![Google Sheets](docs/best_prices_sample_1.png)
+
 # Gold Coin Price Tracker
 
 > This project is based on a real-world use case: tracking and comparing gold coin prices across UK bullion dealers.
