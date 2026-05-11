@@ -1,9 +1,10 @@
 import csv
+import logging
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import List, Dict
-from src.config import HISTORY_RETENTION_DAYS
 
+logger = logging.getLogger("gold_coin_price_tracker")
 
 FIELDNAMES = [
     "timestamp",
@@ -28,26 +29,39 @@ FIELDNAMES = [
 HISTORY_RETENTION_DAYS = 90
 
 
+def _check_unknown_fields(records: List[Dict]) -> None:
+    known = set(FIELDNAMES)
+    unknown = set()
+
+    for record in records:
+        for key in record.keys():
+            if key not in known:
+                unknown.add(key)
+
+    if unknown:
+        logger.warning(f"Unknown fields detected (will be ignored): {sorted(unknown)}")
+
+
 def write_records_to_csv(records: List[Dict], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    _check_unknown_fields(records)
 
     with open(output_path, "w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=FIELDNAMES)
+        writer = csv.DictWriter(file, fieldnames=FIELDNAMES, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(records)
 
 
 def append_records_to_csv(records: List[Dict], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    _check_unknown_fields(records)
 
-    # --- Читаем существующую историю ---
     existing_records = []
     if output_path.exists():
         with open(output_path, "r", newline="", encoding="utf-8") as file:
             reader = csv.DictReader(file)
             existing_records = list(reader)
 
-    # --- Отсекаем записи старше 90 дней ---
     cutoff = datetime.now(timezone.utc) - timedelta(days=HISTORY_RETENTION_DAYS)
     retained_records = []
 
@@ -60,10 +74,8 @@ def append_records_to_csv(records: List[Dict], output_path: Path) -> None:
             if ts >= cutoff:
                 retained_records.append(record)
         except (ValueError, TypeError):
-            # Если timestamp не парсится — оставляем запись
             retained_records.append(record)
 
-    # --- Пишем retained + новые записи ---
     with open(output_path, "w", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=FIELDNAMES, extrasaction="ignore")
         writer.writeheader()
