@@ -1,4 +1,5 @@
 import logging
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 
@@ -15,7 +16,12 @@ def setup_logger(log_path: Path) -> logging.Logger:
         "%(asctime)s | %(levelname)s | %(message)s"
     )
 
-    file_handler = logging.FileHandler(log_path, encoding="utf-8")
+    file_handler = RotatingFileHandler(
+        log_path,
+        maxBytes=5 * 1024 * 1024,  # 5 MB
+        backupCount=3,              # хранить app.log, app.log.1, app.log.2, app.log.3
+        encoding="utf-8",
+    )
     file_handler.setFormatter(formatter)
 
     console_handler = logging.StreamHandler()
