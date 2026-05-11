@@ -1,6 +1,11 @@
-import pandas as pd
-from src.config import LATEST_OUTPUT_PATH
+from src.config import (
+    REQUEST_DELAY_SECONDS,
+    RETRY_COUNT,
+    TIMEOUT,
+    HISTORY_RETENTION_DAYS,
+)
 
-df = pd.read_csv(LATEST_OUTPUT_PATH)
-ukb = df[df["dealer"] == "ukbullion"]
-print(ukb["availability"].value_counts())
+print(f"REQUEST_DELAY_SECONDS:  {REQUEST_DELAY_SECONDS}")
+print(f"RETRY_COUNT:            {RETRY_COUNT}")
+print(f"TIMEOUT:                {TIMEOUT}")
+print(f"HISTORY_RETENTION_DAYS: {HISTORY_RETENTION_DAYS}")

@@ -1,5 +1,6 @@
 import time
 import requests
+from src.config import RETRY_COUNT, TIMEOUT
 
 
 DEFAULT_HEADERS = {

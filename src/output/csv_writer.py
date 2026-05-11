@@ -2,6 +2,7 @@ import csv
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import List, Dict
+from src.config import HISTORY_RETENTION_DAYS
 
 
 FIELDNAMES = [
