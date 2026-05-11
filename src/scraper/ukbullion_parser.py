@@ -152,7 +152,11 @@ def extract_availability(block_text: str) -> Optional[str]:
     if "out of stock" in lower_text:
         return "Out Of Stock"
 
-    if "in stock" in lower_text:
+    if "notify me" in lower_text:
+        return "Out Of Stock"
+
+    # Если есть цена — товар доступен
+    if "add to cart" in lower_text or "more info" in lower_text:
         return "In Stock"
 
     return None
