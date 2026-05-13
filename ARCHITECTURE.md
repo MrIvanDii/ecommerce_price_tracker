@@ -1,6 +1,6 @@
 # Project Architecture
 
-Generated: 2026-05-10 12:28:33
+Generated: 2026-05-13 17:27:15
 Root: `/Users/martina/PycharmProjects/PythonProject/ecommerce_price_tracker`
 
 ```
@@ -8,41 +8,49 @@ ecommerce_price_tracker/
 ├── data/
 │   └── output/
 │       ├── .gitkeep
-│       ├── best_prices.csv  [4,799 bytes]
-│       ├── latest_prices.csv  [61,599 bytes]
-│       ├── price_history.csv  [1,838,679 bytes]
-│       └── price_spread.csv  [3,530 bytes]
+│       ├── best_prices.csv  [7,345 bytes]
+│       ├── latest_prices.csv  [44,167 bytes]
+│       ├── price_history.csv  [1,295,386 bytes]
+│       └── price_spread.csv  [3,461 bytes]
+├── database/
+│   └── schema.sql  [1,563 bytes]
+├── docs/
+│   ├── best_prices_sample_1.png  [751,777 bytes]
+│   ├── google_sheets_preview.png  [894,321 bytes]
+│   ├── google_sheets_preview_2.png  [1,019,077 bytes]
+│   ├── google_sheets_preview_3.png  [557,146 bytes]
+│   └── prices_sample_1.png  [1,054,498 bytes]
 ├── logs/
 │   ├── .gitkeep
-│   └── app.log  [245,043 bytes]
+│   └── app.log  [303,128 bytes]
 ├── secrets/
 │   └── google_service_account.json  [2,397 bytes]
 ├── src/
 │   ├── analytics/
-│   │   ├── best_prices.py  [1,809 bytes]
-│   │   └── price_spread.py  [2,923 bytes]
+│   │   ├── best_prices.py  [2,237 bytes]
+│   │   └── price_spread.py  [3,298 bytes]
 │   ├── data/
 │   │   └── output/
 │   │       └── atkinsons_debug.html  [453,115 bytes]
 │   ├── output/
 │   │   ├── analytics_csv_writer.py  [757 bytes]
-│   │   ├── csv_writer.py  [1,135 bytes]
+│   │   ├── csv_writer.py  [2,438 bytes]
 │   │   └── google_sheets.py  [2,469 bytes]
 │   ├── processing/
 │   │   ├── cleaner.py  [1,102 bytes]
-│   │   ├── deduplicator.py  [336 bytes]
-│   │   ├── product_metadata.py  [2,775 bytes]
+│   │   ├── deduplicator.py  [809 bytes]
+│   │   ├── product_metadata.py  [4,519 bytes]
 │   │   ├── source_metadata.py  [400 bytes]
 │   │   └── validator.py  [675 bytes]
 │   ├── scraper/
 │   │   ├── atkinsons_parser.py  [6,745 bytes]
 │   │   ├── browser_fetcher.py  [1,122 bytes]
 │   │   ├── bullionbypost_parser.py  [7,462 bytes]
-│   │   ├── fetcher.py  [401 bytes]
+│   │   ├── fetcher.py  [1,200 bytes]
 │   │   ├── selectors.py
-│   │   └── ukbullion_parser.py  [4,724 bytes]
-│   ├── config.py  [502 bytes]
-│   ├── logger.py  [677 bytes]
+│   │   └── ukbullion_parser.py  [4,886 bytes]
+│   ├── config.py  [761 bytes]
+│   ├── logger.py  [885 bytes]
 │   ├── main.py  [4,501 bytes]
 │   ├── models.py
 │   ├── sources.py  [2,175 bytes]
@@ -50,10 +58,13 @@ ecommerce_price_tracker/
 │   └── test_atkinsons_parser.py  [1,043 bytes]
 ├── tests/
 │   └── .gitkeep
-├── .env  [141 bytes]
+├── .env  [216 bytes]
+├── .env.example  [293 bytes]
 ├── .gitignore  [375 bytes]
-├── claud_test.py  [1,411 bytes]
+├── ARCHITECTURE.md  [2,661 bytes]
+├── claud_test.py  [756 bytes]
 ├── print_architecture.py  [2,385 bytes]
-├── README.md
-└── requirements.txt  [412 bytes]
+├── README.md  [3,738 bytes]
+├── requirements.txt  [412 bytes]
+└── testic.py  [321 bytes]
 ```
