@@ -24,6 +24,8 @@ from src.output.google_sheets import (
     write_best_prices,
 )
 
+from src.output.db_writer import write_to_db
+
 
 def main() -> None:
     logger = setup_logger(LOG_PATH)
@@ -85,15 +87,24 @@ def main() -> None:
     write_records_to_csv(validated_records, LATEST_OUTPUT_PATH)
     write_price_spreads_to_csv(price_spread_records, PRICE_SPREAD_OUTPUT_PATH)
     append_records_to_csv(validated_records, HISTORY_OUTPUT_PATH)
-
     write_records_to_csv(best_price_records, BEST_PRICES_OUTPUT_PATH)
+
     logger.info(f"Best price records saved: {len(best_price_records)}")
     logger.info(f"Best prices CSV saved to: {BEST_PRICES_OUTPUT_PATH}")
+
     logger.info("Writing records to Google Sheets")
     write_latest_prices(validated_records)
     append_price_history(validated_records)
     write_best_prices(best_price_records)
     logger.info("Google Sheets updated successfully")
+
+    logger.info("Writing records to database")
+    write_to_db(
+        latest=validated_records,
+        history=validated_records,
+        best=best_price_records,
+    )
+    logger.info("Database updated successfully")
 
     success_count = sum(
         1 for r in validated_records if r.get("scrape_status") == "success"
