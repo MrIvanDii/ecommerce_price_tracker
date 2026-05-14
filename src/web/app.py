@@ -1,23 +1,25 @@
+import psycopg2
+import psycopg2.extras
 from flask import Flask, render_template
-from src.output.db import get_connection
-from mysql.connector import Error
-import src.config as config
+import os
 
 app = Flask(__name__)
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 
 def query_db(sql: str) -> list[dict]:
     conn = None
     try:
-        conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute(sql)
         return cursor.fetchall()
-    except Error as e:
+    except Exception as e:
         print(f"DB error: {e}")
         return []
     finally:
-        if conn and conn.is_connected():
+        if conn:
             conn.close()
 
 
@@ -38,16 +40,16 @@ def dashboard():
     """)
 
     spread = query_db("""
-        SELECT 
+        SELECT
             coin_family,
             weight,
             MIN(price) as min_price,
             MAX(price) as max_price,
-            ROUND(MAX(price) - MIN(price), 2) as spread,
+            ROUND(CAST(MAX(price) - MIN(price) AS NUMERIC), 2) as spread,
             COUNT(DISTINCT dealer) as dealer_count
         FROM price_latest
         GROUP BY coin_family, weight
-        HAVING dealer_count > 1
+        HAVING COUNT(DISTINCT dealer) > 1
         ORDER BY spread DESC
     """)
 

@@ -1,5 +1,5 @@
-import mysql.connector
-from mysql.connector import Error
+import psycopg2
+import psycopg2.extras
 import src.config as config
 from src.logger import setup_logger
 
@@ -7,14 +7,8 @@ logger = setup_logger(config.LOG_PATH)
 
 
 def get_connection():
-    """Create and return a MySQL connection."""
-    return mysql.connector.connect(
-        host=config.DB_HOST,
-        port=config.DB_PORT,
-        database=config.DB_NAME,
-        user=config.DB_USER,
-        password=config.DB_PASSWORD
-    )
+    """Create and return a PostgreSQL connection."""
+    return psycopg2.connect(config.DATABASE_URL)
 
 
 def upsert_latest(records: list[dict]):
@@ -41,15 +35,15 @@ def upsert_latest(records: list[dict]):
                  %(price_per_oz)s, %(currency)s, %(availability)s,
                  %(listing_url)s)
         """
-        cursor.executemany(sql, records)
+        psycopg2.extras.execute_batch(cursor, sql, records)
         conn.commit()
-        logger.info(f"upsert_latest: inserted {cursor.rowcount} records")
+        logger.info(f"upsert_latest: inserted {len(records)} records")
 
-    except Error as e:
+    except Exception as e:
         logger.error(f"upsert_latest failed: {e}")
         raise
     finally:
-        if conn and conn.is_connected():
+        if conn:
             conn.close()
 
 
@@ -75,22 +69,22 @@ def insert_history(records: list[dict], retention_days: int = 90):
                  %(price_per_oz)s, %(currency)s, %(availability)s,
                  %(listing_url)s)
         """
-        cursor.executemany(sql, records)
+        psycopg2.extras.execute_batch(cursor, sql, records)
 
         cursor.execute("""
             DELETE FROM price_history
-            WHERE created_at < NOW() - INTERVAL %s DAY
+            WHERE created_at < NOW() - INTERVAL '%s days'
         """, (retention_days,))
 
         conn.commit()
         logger.info(f"insert_history: inserted {len(records)} records, "
                     f"deleted old records beyond {retention_days} days")
 
-    except Error as e:
+    except Exception as e:
         logger.error(f"insert_history failed: {e}")
         raise
     finally:
-        if conn and conn.is_connected():
+        if conn:
             conn.close()
 
 
@@ -116,13 +110,13 @@ def upsert_best(records: list[dict]):
                  %(best_price_per_oz)s, %(dealer)s, %(product_name_clean)s,
                  %(year)s, %(currency)s, %(listing_url)s)
         """
-        cursor.executemany(sql, records)
+        psycopg2.extras.execute_batch(cursor, sql, records)
         conn.commit()
-        logger.info(f"upsert_best: inserted {cursor.rowcount} records")
+        logger.info(f"upsert_best: inserted {len(records)} records")
 
-    except Error as e:
+    except Exception as e:
         logger.error(f"upsert_best failed: {e}")
         raise
     finally:
-        if conn and conn.is_connected():
+        if conn:
             conn.close()

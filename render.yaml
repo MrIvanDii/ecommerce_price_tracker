@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: gold-tracker-web
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --chdir src/web app:app
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://gold_tracker_db_user:g4g0TZ4d26mIxYWqcJHlU76jzxewMPAi@dpg-d82vu6gjs32c73ed5e4g-a.frankfurt-postgres.render.com/gold_tracker_db

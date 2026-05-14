@@ -17,7 +17,7 @@ def _prepare_record(record: dict) -> dict:
         "price": record.get("price"),
         "price_per_oz": record.get("price_per_oz"),
         "currency": record.get("currency"),
-        "availability": record.get("availability"),
+        "availability": record.get("availability") == "in_stock",
         "listing_url": record.get("listing_url") or record.get("product_url"),
     }
 
@@ -38,7 +38,7 @@ def _prepare_best_record(record: dict) -> dict:
 
 
 def write_to_db(latest: list[dict], history: list[dict], best: list[dict]):
-    """Write all pipeline outputs to MySQL."""
+    """Write all pipeline outputs to PostgreSQL."""
 
     logger.info("DB write started")
 
