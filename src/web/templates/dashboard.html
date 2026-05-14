@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gold Price Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+        <div class="brand">
+            <span class="brand-symbol">◆</span>
+            <span class="brand-name">GOLD TRACKER</span>
+        </div>
+        <div class="meta">
+            {% if last_updated %}
+                <span class="label">LAST RUN</span>
+                <span class="value mono">{{ last_updated }}</span>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<main>
+
+    <!-- BEST PRICES -->
+    <section>
+        <div class="section-header">
+            <h2>Best Prices</h2>
+            <span class="section-tag">cheapest per coin</span>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Coin</th>
+                        <th>Weight</th>
+                        <th>Year</th>
+                        <th>Dealer</th>
+                        <th class="num">Price</th>
+                        <th class="num">Per oz</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in best %}
+                    <tr>
+                        <td class="coin-name">{{ row.coin_family }}</td>
+                        <td class="mono">{{ row.weight }}</td>
+                        <td class="mono dim">{{ row.year or '—' }}</td>
+                        <td><span class="dealer-tag">{{ row.dealer }}</span></td>
+                        <td class="num price-best">£{{ "%.2f"|format(row.best_price or 0) }}</td>
+                        <td class="num dim mono">£{{ "%.2f"|format(row.best_price_per_oz or 0) }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="empty">No data</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- PRICE SPREAD -->
+    <section>
+        <div class="section-header">
+            <h2>Price Spread</h2>
+            <span class="section-tag">dealer gap analysis</span>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Coin</th>
+                        <th>Weight</th>
+                        <th class="num">Min</th>
+                        <th class="num">Max</th>
+                        <th class="num">Spread</th>
+                        <th class="num">Dealers</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in spread %}
+                    <tr>
+                        <td class="coin-name">{{ row.coin_family }}</td>
+                        <td class="mono">{{ row.weight }}</td>
+                        <td class="num mono">£{{ "%.2f"|format(row.min_price or 0) }}</td>
+                        <td class="num mono">£{{ "%.2f"|format(row.max_price or 0) }}</td>
+                        <td class="num spread-val">£{{ "%.2f"|format(row.spread or 0) }}</td>
+                        <td class="num dim">{{ row.dealer_count }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="empty">No data</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ALL PRICES -->
+    <section>
+        <div class="section-header">
+            <h2>All Prices</h2>
+            <span class="section-tag">current listings</span>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Coin</th>
+                        <th>Weight</th>
+                        <th>Year</th>
+                        <th>Dealer</th>
+                        <th class="num">Price</th>
+                        <th class="num">Per oz</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in latest %}
+                    <tr>
+                        <td class="coin-name">{{ row.coin_family or row.product_name_clean }}</td>
+                        <td class="mono">{{ row.weight }}</td>
+                        <td class="mono dim">{{ row.year or '—' }}</td>
+                        <td><span class="dealer-tag">{{ row.dealer }}</span></td>
+                        <td class="num mono">£{{ "%.2f"|format(row.price or 0) }}</td>
+                        <td class="num dim mono">£{{ "%.2f"|format(row.price_per_oz or 0) }}</td>
+                        <td>
+                            <span class="avail {% if row.availability %}avail-yes{% else %}avail-no{% endif %}">
+                                {{ 'In Stock' if row.availability else 'Out' }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="empty">No data</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <span>Gold Price Tracker — data scraped from UK bullion dealers</span>
+</footer>
+
+</body>
+</html>

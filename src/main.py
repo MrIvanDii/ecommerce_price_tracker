@@ -9,7 +9,7 @@ from src.config import (
     REQUEST_DELAY_SECONDS,
 )
 
-from src.analytics.best_prices import find_best_prices
+from src.analytics.best_prices import find_best_prices, should_exclude_from_best_prices
 from src.analytics.price_spread import calculate_price_spreads
 from src.output.analytics_csv_writer import write_price_spreads_to_csv
 
@@ -81,10 +81,15 @@ def main() -> None:
 
     unique_records = deduplicate_by_product_url(all_records)
     validated_records = validate_records(unique_records)
-    best_price_records = find_best_prices(validated_records)
 
+    # Filter out accessories, bulk, proof etc. for display purposes
+    # Full history is kept unfiltered intentionally
+    display_records = [r for r in validated_records if not should_exclude_from_best_prices(r)]
+
+    best_price_records = find_best_prices(validated_records)
     price_spread_records = calculate_price_spreads(validated_records)
-    write_records_to_csv(validated_records, LATEST_OUTPUT_PATH)
+
+    write_records_to_csv(display_records, LATEST_OUTPUT_PATH)
     write_price_spreads_to_csv(price_spread_records, PRICE_SPREAD_OUTPUT_PATH)
     append_records_to_csv(validated_records, HISTORY_OUTPUT_PATH)
     write_records_to_csv(best_price_records, BEST_PRICES_OUTPUT_PATH)
@@ -93,14 +98,14 @@ def main() -> None:
     logger.info(f"Best prices CSV saved to: {BEST_PRICES_OUTPUT_PATH}")
 
     logger.info("Writing records to Google Sheets")
-    write_latest_prices(validated_records)
+    write_latest_prices(display_records)
     append_price_history(validated_records)
     write_best_prices(best_price_records)
     logger.info("Google Sheets updated successfully")
 
     logger.info("Writing records to database")
     write_to_db(
-        latest=validated_records,
+        latest=display_records,
         history=validated_records,
         best=best_price_records,
     )
@@ -124,6 +129,7 @@ def main() -> None:
     logger.info(f"Failed pages: {failed_pages}")
     logger.info(f"Total raw records parsed: {len(all_records)}")
     logger.info(f"Unique records saved: {len(validated_records)}")
+    logger.info(f"Display records (filtered): {len(display_records)}")
     logger.info(f"Latest CSV saved to: {LATEST_OUTPUT_PATH}")
     logger.info(f"History CSV updated at: {HISTORY_OUTPUT_PATH}")
     logger.info(f"Price spread records saved: {len(price_spread_records)}")

@@ -43,7 +43,10 @@ def find_best_prices(records: List[Dict]) -> List[Dict]:
             key=lambda r: r.get("price_per_oz"),
         )
 
-        best_price_records.append(best_record)
+        result = dict(best_record)
+        result["best_price"] = best_record.get("price")
+        result["best_price_per_oz"] = best_record.get("price_per_oz")
+        best_price_records.append(result)
 
     return best_price_records
 
