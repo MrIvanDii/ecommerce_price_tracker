@@ -120,3 +120,4 @@ def calculate_price_spreads(records: List[Dict]) -> List[Dict]:
         )
 
     return spread_results
+

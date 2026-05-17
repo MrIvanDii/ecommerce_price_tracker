@@ -79,19 +79,25 @@ def extract_weight(product_name: str) -> Optional[str]:
 def extract_coin_family(product_name: str) -> Optional[str]:
     text = product_name.lower()
 
-    # Eagle — только американский, не британский "Lion and the Eagle"
+    # Eagle — только американский, не "Lion and the Eagle"
     if any(k in text for k in ["american eagle", "us eagle", "usa eagle"]):
         return "eagle"
 
+    # Порядок важен: многословные паттерны — первыми
     families = {
-        "britannia":    "britannia",
-        "krugerrand":   "krugerrand",
-        "sovereign":    "sovereign",
-        "maple leaf":   "maple_leaf",
-        "maple":        "maple_leaf",
-        "kangaroo":     "kangaroo",
-        "panda":        "panda",
-        "philharmonic": "philharmonic",
+        "lion and the eagle": "lion_eagle",
+        "st george":          "st_george",
+        "maple leaf":         "maple_leaf",
+        "britannia":          "britannia",
+        "krugerrand":         "krugerrand",
+        "sovereign":          "sovereign",
+        "maple":              "maple_leaf",
+        "kangaroo":           "kangaroo",
+        "kangaroo":           "kangaroo",
+        "buffalo":            "buffalo",
+        "koala":              "koala",
+        "panda":              "panda",
+        "philharmonic":       "philharmonic",
     }
 
     for keyword, normalized in families.items():
