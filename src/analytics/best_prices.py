@@ -95,6 +95,7 @@ def should_exclude_from_best_prices(record: Dict) -> bool:
         "francs",
         "st gaudens",
         "corona",
+        "platinum",
     ]
 
     return any(keyword in product_name for keyword in excluded_keywords)

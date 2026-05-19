@@ -35,7 +35,7 @@ def normalize_product_name(product_name: Optional[str]) -> Optional[str]:
 def extract_weight(product_name: str) -> Optional[str]:
     text = product_name.lower()
 
-    # --- Граммы (проверяем первыми чтобы не конфликтовали с oz) ---
+    # --- Граммы ---
     gram_match = re.search(r"\b(\d+(?:\.\d+)?)\s*g\b", text)
     if gram_match:
         grams = float(gram_match.group(1))
@@ -43,18 +43,18 @@ def extract_weight(product_name: str) -> Optional[str]:
 
     # --- Стандартные oz паттерны ---
     oz_patterns = [
-        (r"\b1\s*2\s*ounce\b", "1/2oz"),  # "1 2 Ounce" после normalize
-        (r"\b1\s*ounce\b", "1oz"),  # "1 Ounce"
-        (r"\bone[\s-]ounce\b", "1oz"),  # "one ounce" → 1oz
-        (r"\bone[\s-]oz\b", "1oz"),  # "one oz" → 1oz
+        (r"\b1\s*2\s*ounce\b", "1/2oz"),
+        (r"\b1\s*ounce\b", "1oz"),
+        (r"\bone[\s-]ounce\b", "1oz"),
+        (r"\bone[\s-]oz\b", "1oz"),
         (r"\b1\s*/\s*10\s*oz\b", "1/10oz"),
-        (r"\b1\s*10\s*oz\b", "1/10oz"),  # "1 10Oz" после normalize
+        (r"\b1\s*10\s*oz\b", "1/10oz"),
         (r"\btenth[\s-]ounce\b", "1/10oz"),
         (r"\b1\s*/\s*4\s*oz\b", "1/4oz"),
-        (r"\b1\s*4\s*oz\b", "1/4oz"),  # "1 4Oz" после normalize
+        (r"\b1\s*4\s*oz\b", "1/4oz"),
         (r"\bquarter[\s-]ounce\b", "1/4oz"),
         (r"\b1\s*/\s*2\s*oz\b", "1/2oz"),
-        (r"\b1\s*2\s*oz\b", "1/2oz"),  # "1 2Oz" после normalize
+        (r"\b1\s*2\s*oz\b", "1/2oz"),
         (r"\bhalf[\s-]oz\b", "1/2oz"),
         (r"\bhalf[\s-]ounce\b", "1/2oz"),
         (r"\b1\s*oz\b", "1oz"),
@@ -64,13 +64,11 @@ def extract_weight(product_name: str) -> Optional[str]:
         if re.search(pattern, text):
             return normalized
 
-    # --- Sovereign весa (после oz чтобы не конфликтовали) ---
-    # Порядок важен: double > half > full/обычный
-    if re.search(r"\bdouble[\s-]sovereign\b", text):
+    if re.search(r"\bdouble[\s-]sovereigns?\b", text):
         return "2sovereign"
-    if re.search(r"\bhalf[\s-]sovereign\b", text):
+    if re.search(r"\bhalf[\s-]sovereigns?\b|½\s*sovereigns?\b", text):
         return "1/2sovereign"
-    if re.search(r"\bfull[\s-]sovereign\b", text) or re.search(r"\bsovereign\b", text):
+    if re.search(r"\bfull[\s-]sovereigns?\b", text) or re.search(r"\bsovereigns?\b", text):
         return "1sovereign"
 
     return None
@@ -79,20 +77,36 @@ def extract_weight(product_name: str) -> Optional[str]:
 def extract_coin_family(product_name: str) -> Optional[str]:
     text = product_name.lower()
 
-    # Eagle — только американский, не "Lion and the Eagle"
     if any(k in text for k in ["american eagle", "us eagle", "usa eagle"]):
         return "eagle"
 
-    # Порядок важен: многословные паттерны — первыми
+    queens_beast_animals = [
+        "lion of england",
+        "red dragon",
+        "unicorn of scotland",
+        "yale of beaufort",
+        "white greyhound",
+        "falcon of the plantagenets",
+        "falcon pf the plantagenets",
+        "griffin of edward",
+        "black bull",
+        "white horse of hanover",
+        "white lion of mortimer",
+        "white lion of england",
+    ]
+
+    if any(animal in text for animal in queens_beast_animals):
+        return "queens_beast"
+
     families = {
         "lion and the eagle": "lion_eagle",
         "st george":          "st_george",
+        "tudor":              "tudor_beast",
         "maple leaf":         "maple_leaf",
         "britannia":          "britannia",
         "krugerrand":         "krugerrand",
         "sovereign":          "sovereign",
         "maple":              "maple_leaf",
-        "kangaroo":           "kangaroo",
         "kangaroo":           "kangaroo",
         "buffalo":            "buffalo",
         "koala":              "koala",
@@ -105,7 +119,6 @@ def extract_coin_family(product_name: str) -> Optional[str]:
             return normalized
 
     return None
-
 
 def extract_product_metadata(product_name: Optional[str]) -> Dict[str, Optional[str]]:
     if not product_name:
@@ -127,7 +140,6 @@ def weight_to_oz(weight: Optional[str]) -> Optional[float]:
         "1/2oz":        0.5,
         "1/4oz":        0.25,
         "1/10oz":       0.1,
-        # Sovereigns
         "1sovereign":   0.2354,
         "1/2sovereign": 0.1177,
         "2sovereign":   0.4708,
@@ -136,7 +148,6 @@ def weight_to_oz(weight: Optional[str]) -> Optional[float]:
     if weight in weight_map:
         return weight_map[weight]
 
-    # Граммы вида "30g", "15g", "8g"
     gram_match = re.match(r"^(\d+(?:\.\d+)?)g$", weight)
     if gram_match:
         grams = float(gram_match.group(1))
