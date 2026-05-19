@@ -1,6 +1,6 @@
 # Project Architecture
 
-Generated: 2026-05-19 17:52:54
+Generated: 2026-05-19 18:17:55
 Root: `/Users/martina/PycharmProjects/PythonProject/ecommerce_price_tracker`
 
 ```
@@ -8,10 +8,10 @@ ecommerce_price_tracker/
 ├── data/
 │   └── output/
 │       ├── .gitkeep
-│       ├── best_prices.csv  [8,855 bytes]
-│       ├── latest_prices.csv  [34,834 bytes]
-│       ├── price_history.csv  [1,750,988 bytes]
-│       └── price_spread.csv  [3,488 bytes]
+│       ├── best_prices.csv  [9,799 bytes]
+│       ├── latest_prices.csv  [34,230 bytes]
+│       ├── price_history.csv  [1,876,191 bytes]
+│       └── price_spread.csv  [5,138 bytes]
 ├── database/
 │   └── schema.sql  [1,472 bytes]
 ├── docs/
@@ -22,12 +22,12 @@ ecommerce_price_tracker/
 │   └── prices_sample_1.png  [1,054,498 bytes]
 ├── logs/
 │   ├── .gitkeep
-│   └── app.log  [376,242 bytes]
+│   └── app.log  [394,875 bytes]
 ├── secrets/
 │   └── google_service_account.json  [2,397 bytes]
 ├── src/
 │   ├── analytics/
-│   │   ├── best_prices.py  [2,393 bytes]
+│   │   ├── best_prices.py  [2,413 bytes]
 │   │   └── price_spread.py  [3,300 bytes]
 │   ├── data/
 │   │   └── output/
@@ -41,7 +41,7 @@ ecommerce_price_tracker/
 │   ├── processing/
 │   │   ├── cleaner.py  [1,102 bytes]
 │   │   ├── deduplicator.py  [809 bytes]
-│   │   ├── product_metadata.py  [4,849 bytes]
+│   │   ├── product_metadata.py  [4,694 bytes]
 │   │   ├── source_metadata.py  [400 bytes]
 │   │   └── validator.py  [675 bytes]
 │   ├── scraper/
@@ -70,7 +70,7 @@ ecommerce_price_tracker/
 ├── .env  [438 bytes]
 ├── .env.example  [372 bytes]
 ├── .gitignore  [414 bytes]
-├── ARCHITECTURE.md  [3,095 bytes]
+├── ARCHITECTURE.md  [3,224 bytes]
 ├── check_session.sh  [357 bytes]
 ├── claud_test.py  [756 bytes]
 ├── print_architecture.py  [2,385 bytes]
