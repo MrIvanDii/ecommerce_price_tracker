@@ -1,6 +1,6 @@
 # Project Architecture
 
-Generated: 2026-05-19 18:17:55
+Generated: 2026-05-19 20:17:55
 Root: `/Users/martina/PycharmProjects/PythonProject/ecommerce_price_tracker`
 
 ```
@@ -8,10 +8,10 @@ ecommerce_price_tracker/
 ├── data/
 │   └── output/
 │       ├── .gitkeep
-│       ├── best_prices.csv  [9,799 bytes]
-│       ├── latest_prices.csv  [34,230 bytes]
-│       ├── price_history.csv  [1,876,191 bytes]
-│       └── price_spread.csv  [5,138 bytes]
+│       ├── best_prices.csv  [12,047 bytes]
+│       ├── latest_prices.csv  [53,972 bytes]
+│       ├── price_history.csv  [2,301,521 bytes]
+│       └── price_spread.csv  [6,448 bytes]
 ├── database/
 │   └── schema.sql  [1,472 bytes]
 ├── docs/
@@ -22,7 +22,7 @@ ecommerce_price_tracker/
 │   └── prices_sample_1.png  [1,054,498 bytes]
 ├── logs/
 │   ├── .gitkeep
-│   └── app.log  [394,875 bytes]
+│   └── app.log  [453,967 bytes]
 ├── secrets/
 │   └── google_service_account.json  [2,397 bytes]
 ├── src/
@@ -50,6 +50,7 @@ ecommerce_price_tracker/
 │   │   ├── browser_fetcher.py  [1,122 bytes]
 │   │   ├── bullionbypost_parser.py  [7,462 bytes]
 │   │   ├── fetcher.py  [1,200 bytes]
+│   │   ├── royalmint_parser.py  [5,464 bytes]
 │   │   ├── selectors.py
 │   │   └── ukbullion_parser.py  [4,886 bytes]
 │   ├── web/
@@ -60,10 +61,10 @@ ecommerce_price_tracker/
 │   │   └── app.py  [1,834 bytes]
 │   ├── config.py  [814 bytes]
 │   ├── logger.py  [885 bytes]
-│   ├── main.py  [6,067 bytes]
+│   ├── main.py  [7,039 bytes]
 │   ├── models.py
 │   ├── sources.py  [2,578 bytes]
-│   ├── sources_registry.py  [1,604 bytes]
+│   ├── sources_registry.py  [1,697 bytes]
 │   └── test_atkinsons_parser.py  [1,043 bytes]
 ├── tests/
 │   └── .gitkeep
