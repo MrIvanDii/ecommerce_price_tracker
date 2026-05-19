@@ -1,4 +1,11 @@
 # src/scraper/royalmint_parser.py
+from datetime import datetime, timezone
+from src.processing.product_metadata import (
+    extract_product_metadata,
+    normalize_product_name,
+    calculate_price_per_oz,
+)
+from src.processing.cleaner import normalize_availability
 
 from typing import Optional
 import time
@@ -41,30 +48,37 @@ def _parse_item(item: dict) -> Optional[dict]:
         price = item.get("Price")
         currency = item.get("CurrencyCode", "GBP")
         entry_url = item.get("EntryUrl", "")
-        status = stock.get("StatusMessage", "Unknown")
-        code = item.get("Code", "")
+        availability_raw = stock.get("StatusMessage", "Unknown")
 
         if not product_name or price is None or not entry_url:
             return None
 
         product_url = BASE_URL + entry_url
-        listing_url = product_url  # нет отдельной listing страницы
+        metadata = extract_product_metadata(product_name)
+        product_name_clean = normalize_product_name(product_name)
+        price_per_oz = calculate_price_per_oz(price, metadata["weight"])
 
         return {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "dealer": DEALER,
-            "listing_url": listing_url,
+            "listing_url": product_url,
             "product_url": product_url,
             "source_category": SOURCE_CATEGORY,
             "product_name": product_name,
+            "product_name_clean": product_name_clean,
+            "year": metadata["year"],
+            "weight": metadata["weight"],
+            "coin_family": metadata["coin_family"],
             "price": float(price),
+            "price_per_oz": price_per_oz,
             "currency": currency,
-            "availability": status,
+            "availability": normalize_availability(availability_raw),
             "raw_price_text": variant.get("Price", ""),
-            "scrape_status": "ok",
+            "scrape_status": "success",
             "error_message": None,
         }
     except Exception as e:
-        logger.warning(f"Failed to parse item: {e}")
+        logger.warning(f"RoyalMint: failed to parse item: {e}")
         return None
 
 
