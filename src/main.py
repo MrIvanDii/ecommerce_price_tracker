@@ -44,15 +44,33 @@ def main() -> None:
         source_name = source["name"]
         dealer = source["dealer"]
         fetch_mode = source["fetch_mode"]
-        listing_urls = source["listing_urls"]
         fetcher = source["fetcher"]
-        parser = source["parser"]
+        parser = source.get("parser")
+        listing_urls = source.get("listing_urls", [None])  # api mode: один проход без url
 
         logger.info(
             f"Processing source: {source_name} | dealer={dealer} | fetch_mode={fetch_mode}"
         )
 
         for listing_url in listing_urls:
+
+            # API-style: fetcher сам управляет пагинацией, возвращает готовый список записей
+            if fetch_mode == "api":
+                total_pages += 1
+                try:
+                    records = fetcher()
+                    if records:
+                        successful_pages += 1
+                        logger.info(f"Records found: {len(records)}")
+                        all_records.extend(records)
+                    else:
+                        empty_pages += 1
+                        logger.warning(f"No records returned from API fetcher: {source_name}")
+                except Exception as exc:
+                    failed_pages += 1
+                    logger.error(f"Failed API fetcher: {source_name} | Error: {exc}")
+                continue  # listing_url не используется, пропускаем finally sleep
+
             total_pages += 1
             logger.info(f"Processing listing page: {listing_url}")
 

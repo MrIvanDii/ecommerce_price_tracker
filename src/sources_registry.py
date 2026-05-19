@@ -1,16 +1,13 @@
-from src.sources import UKBULLION_LISTING_URLS, BULLIONBYPOST_LISTING_URLS, ATKINSONS_LISTING_URLS
+from src.sources import UKBULLION_LISTING_URLS, BULLIONBYPOST_LISTING_URLS, ATKINSONS_LISTING_URLS, ACL_LISTING_URLS
 
 from src.scraper.fetcher import fetch_html
 from src.scraper.browser_fetcher import fetch_html_with_browser
 
 from src.scraper.ukbullion_parser import parse_ukbullion_listing
 from src.scraper.bullionbypost_parser import parse_bullionbypost_listing
-
 from src.scraper.atkinsons_parser import parse_atkinsons_listing
-
-from src.sources import UKBULLION_LISTING_URLS, BULLIONBYPOST_LISTING_URLS, ATKINSONS_LISTING_URLS, ACL_LISTING_URLS
 from src.scraper.acl_parser import fetch_acl_product_urls, parse_acl_product_page
-
+from src.scraper.royalmint_parser import fetch_royalmint
 
 
 SOURCES = [
@@ -38,6 +35,12 @@ SOURCES = [
         "fetcher": fetch_html,
         "parser": parse_acl_product_page,
         "pre_fetcher": fetch_acl_product_urls,
+    },
+    {
+        "name": "RoyalMint",
+        "dealer": "royalmint",
+        "fetch_mode": "api",
+        "fetcher": fetch_royalmint,
     },
     # {
     #     "name": "BullionByPost",
