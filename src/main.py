@@ -57,24 +57,44 @@ def main() -> None:
             logger.info(f"Processing listing page: {listing_url}")
 
             try:
-                html = fetcher(listing_url)
-                records = parser(html, listing_url)
+                # ACL-style: двухуровневый fetcher
+                if "pre_fetcher" in source:
+                    product_urls = source["pre_fetcher"](listing_url)
+                    logger.info(f"Product URLs found: {len(product_urls)}")
 
-                if records:
+                    for product_url in product_urls:
+                        try:
+                            html = fetcher(product_url)
+                            records = parser(html, listing_url)
+
+                            if records:
+                                logger.info(f"Records found: {len(records)}")
+                                all_records.extend(records)
+
+                        except Exception as exc:
+                            logger.error(f"Failed to process product page: {product_url} | Error: {exc}")
+
+                        finally:
+                            time.sleep(REQUEST_DELAY_SECONDS)
+
                     successful_pages += 1
-                    logger.info(f"Records found: {len(records)}")
-                    all_records.extend(records)
+
+                # Стандартный одноуровневый fetcher
                 else:
-                    empty_pages += 1
-                    logger.warning(
-                        f"No records found for listing page: {listing_url}"
-                    )
+                    html = fetcher(listing_url)
+                    records = parser(html, listing_url)
+
+                    if records:
+                        successful_pages += 1
+                        logger.info(f"Records found: {len(records)}")
+                        all_records.extend(records)
+                    else:
+                        empty_pages += 1
+                        logger.warning(f"No records found for listing page: {listing_url}")
 
             except Exception as exc:
                 failed_pages += 1
-                logger.error(
-                    f"Failed to process listing page: {listing_url} | Error: {exc}"
-                )
+                logger.error(f"Failed to process listing page: {listing_url} | Error: {exc}")
 
             finally:
                 time.sleep(REQUEST_DELAY_SECONDS)

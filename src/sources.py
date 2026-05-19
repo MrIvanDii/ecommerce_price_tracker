@@ -34,3 +34,11 @@ ATKINSONS_LISTING_URLS = [
     "https://atkinsonsbullion.com/gold/gold-coins/britannia",
     "https://atkinsonsbullion.com/gold/gold-coins/gold-sovereign-coins",
 ]
+
+ACL_LISTING_URLS = [
+    "https://acl-uk.online/product-category/coins/britannia-king/",
+    "https://acl-uk.online/product-category/coins/gold-sovereigns/full-sovereigns/",
+    "https://acl-uk.online/product-category/coins/gold-sovereigns/half-sovereigns/",
+    "https://acl-uk.online/product-category/coins/the-queens-beasts/",
+    "https://acl-uk.online/product-category/coins/the-tudor-beasts/",
+]
