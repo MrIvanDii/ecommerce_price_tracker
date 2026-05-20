@@ -191,3 +191,24 @@ footer {
     font-family: var(--font-mono);
     letter-spacing: 0.06em;
 }
+
+/* PIVOT TABLE */
+.pivot-table .dealer-col {
+    min-width: 90px;
+}
+
+.family-header td {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 6px 12px 6px 0;
+    border-bottom: 1px solid var(--border-strong);
+}
+
+.dash {
+    color: var(--border-strong);
+}

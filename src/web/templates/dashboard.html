@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gold Price Tracker</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -26,121 +25,50 @@
 </header>
 
 <main>
-
-    <!-- BEST PRICES -->
     <section>
         <div class="section-header">
-            <h2>Best Prices</h2>
-            <span class="section-tag">cheapest per coin</span>
+            <h2>Price Comparison</h2>
+            <span class="section-tag">best price per dealer · grouped by coin</span>
         </div>
+
         <div class="table-wrap">
-            <table>
+            <table class="pivot-table">
                 <thead>
                     <tr>
                         <th>Coin</th>
                         <th>Weight</th>
                         <th>Year</th>
-                        <th>Dealer</th>
-                        <th class="num">Price</th>
-                        <th class="num">Per oz</th>
+                        {% for d in dealers %}
+                        <th class="num dealer-col">{{ d | upper }}</th>
+                        {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
-                    {% for row in best %}
-                    <tr>
-                        <td class="coin-name">{{ row.coin_family }}</td>
-                        <td class="mono">{{ row.weight }}</td>
-                        <td class="mono dim">{{ row.year or '—' }}</td>
-                        <td><span class="dealer-tag">{{ row.dealer }}</span></td>
-                        <td class="num price-best">£{{ "%.2f"|format(row.best_price or 0) }}</td>
-                        <td class="num dim mono">£{{ "%.2f"|format(row.best_price_per_oz or 0) }}</td>
+                {% for family, rows in pivot.items() %}
+                    <tr class="family-header">
+                        <td colspan="{{ 3 + dealers|length }}">{{ family | replace('_', ' ') | title }}</td>
                     </tr>
-                    {% else %}
-                    <tr><td colspan="6" class="empty">No data</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <!-- PRICE SPREAD -->
-    <section>
-        <div class="section-header">
-            <h2>Price Spread</h2>
-            <span class="section-tag">dealer gap analysis</span>
-        </div>
-        <div class="table-wrap">
-            <table>
-                <thead>
+                    {% for (weight, year), dealer_prices in rows.items() %}
+                    {% set min_price = min_prices.get((family, (weight, year))) %}
                     <tr>
-                        <th>Coin</th>
-                        <th>Weight</th>
-                        <th class="num">Min</th>
-                        <th class="num">Max</th>
-                        <th class="num">Spread</th>
-                        <th class="num">Dealers</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in spread %}
-                    <tr>
-                        <td class="coin-name">{{ row.coin_family }}</td>
-                        <td class="mono">{{ row.weight }}</td>
-                        <td class="num mono">£{{ "%.2f"|format(row.min_price or 0) }}</td>
-                        <td class="num mono">£{{ "%.2f"|format(row.max_price or 0) }}</td>
-                        <td class="num spread-val">£{{ "%.2f"|format(row.spread or 0) }}</td>
-                        <td class="num dim">{{ row.dealer_count }}</td>
-                    </tr>
-                    {% else %}
-                    <tr><td colspan="6" class="empty">No data</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <!-- ALL PRICES -->
-    <section>
-        <div class="section-header">
-            <h2>All Prices</h2>
-            <span class="section-tag">current listings</span>
-        </div>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Coin</th>
-                        <th>Weight</th>
-                        <th>Year</th>
-                        <th>Dealer</th>
-                        <th class="num">Price</th>
-                        <th class="num">Per oz</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in latest %}
-                    <tr>
-                        <td class="coin-name">{{ row.coin_family or row.product_name_clean }}</td>
-                        <td class="mono">{{ row.weight }}</td>
-                        <td class="mono dim">{{ row.year or '—' }}</td>
-                        <td><span class="dealer-tag">{{ row.dealer }}</span></td>
-                        <td class="num mono">£{{ "%.2f"|format(row.price or 0) }}</td>
-                        <td class="num dim mono">£{{ "%.2f"|format(row.price_per_oz or 0) }}</td>
-                        <td>
-                            <span class="avail {% if row.availability %}avail-yes{% else %}avail-no{% endif %}">
-                                {{ 'In Stock' if row.availability else 'Out' }}
-                            </span>
+                        <td class="coin-name">{{ family | replace('_', ' ') }}</td>
+                        <td class="mono">{{ weight }}</td>
+                        <td class="mono dim">{{ year or '—' }}</td>
+                        {% for d in dealers %}
+                        {% set p = dealer_prices.get(d) %}
+                        <td class="num mono {% if p and min_price and p == min_price %}price-best{% endif %}">
+                            {% if p %}£{{ "%.2f"|format(p) }}{% else %}<span class="dash">—</span>{% endif %}
                         </td>
+                        {% endfor %}
                     </tr>
-                    {% else %}
-                    <tr><td colspan="7" class="empty">No data</td></tr>
                     {% endfor %}
+                {% else %}
+                    <tr><td colspan="{{ 3 + dealers|length }}" class="empty">No data</td></tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
     </section>
-
 </main>
 
 <footer>

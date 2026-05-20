@@ -2,6 +2,7 @@ import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template
 import os
+from collections import defaultdict
 
 app = Flask(__name__)
 
@@ -25,44 +26,62 @@ def query_db(sql: str) -> list[dict]:
 
 @app.route("/")
 def dashboard():
-    latest = query_db("""
-        SELECT dealer, product_name_clean, coin_family, weight,
-               year, price, price_per_oz, currency, availability
-        FROM price_latest
-        ORDER BY coin_family, weight, price
-    """)
-
-    best = query_db("""
-        SELECT coin_family, weight, best_price, best_price_per_oz,
-               dealer, product_name_clean, year, currency
-        FROM price_best
-        ORDER BY coin_family, weight
-    """)
-
-    spread = query_db("""
+    rows = query_db("""
         SELECT
             coin_family,
             weight,
-            MIN(price) as min_price,
-            MAX(price) as max_price,
-            ROUND(CAST(MAX(price) - MIN(price) AS NUMERIC), 2) as spread,
-            COUNT(DISTINCT dealer) as dealer_count
+            year,
+            dealer,
+            MIN(price) as price
         FROM price_latest
-        GROUP BY coin_family, weight
-        HAVING COUNT(DISTINCT dealer) > 1
-        ORDER BY spread DESC
+        WHERE coin_family IS NOT NULL
+        GROUP BY coin_family, weight, year, dealer
+        ORDER BY coin_family, weight, year, dealer
     """)
 
-    last_updated = query_db("""
-        SELECT MAX(timestamp) as ts FROM price_latest
-    """)
+    dealers = ['ukbullion', 'atkinsons', 'acl', 'royalmint']
+
+    family_order = [
+        'britannia', 'sovereign', 'krugerrand',
+        'queens_beast', 'tudor_beast', 'st_george',
+        'lion_eagle', 'buffalo', 'koala', 'other'
+    ]
+
+    pivot = defaultdict(lambda: defaultdict(dict))
+    for r in rows:
+        family = r['coin_family'] or 'other'
+        key = (r['weight'], r['year'])
+        pivot[family][key][r['dealer']] = r['price']
+
+    def family_sort(f):
+        if f is None:
+            return 100
+        return family_order.index(f) if f in family_order else 99
+
+    pivot_sorted = {
+        f: dict(sorted(pivot[f].items(), key=lambda x: (x[0][0] or '', x[0][1] or '')))
+        for f in sorted(pivot.keys(), key=family_sort)
+    }
+
+    # Конвертируем в float и считаем min_price per row
+    min_prices = {}
+    for family, rows_data in pivot_sorted.items():
+        for key, dealer_prices in rows_data.items():
+            prices = []
+            for d in dealer_prices:
+                if dealer_prices[d] is not None:
+                    dealer_prices[d] = float(dealer_prices[d])
+                    prices.append(dealer_prices[d])
+            min_prices[(family, key)] = min(prices) if prices else None
+
+    last_updated = query_db("SELECT MAX(timestamp) as ts FROM price_latest")
     last_updated = last_updated[0]["ts"] if last_updated else None
 
     return render_template(
         "dashboard.html",
-        latest=latest,
-        best=best,
-        spread=spread,
+        pivot=pivot_sorted,
+        dealers=dealers,
+        min_prices=min_prices,
         last_updated=last_updated,
     )
 
