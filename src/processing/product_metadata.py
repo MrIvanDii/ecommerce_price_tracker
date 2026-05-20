@@ -64,12 +64,14 @@ def extract_weight(product_name: str) -> Optional[str]:
         if re.search(pattern, text):
             return normalized
 
-    # --- Sovereign паттерны (от специфичных к общим) ---
+    # Sovereign паттерны
     if re.search(r"\bquarter[\s-]sovereigns?\b", text):
         return "1/4sovereign"
     if re.search(r"\bdouble[\s-]sovereigns?\b", text):
         return "2sovereign"
-    if re.search(r"\bhalf[\s-]sovereigns?\b|½\s*sovereigns?\b", text):
+    if re.search(r"\bhalf[\s\w]*sovereigns?\b", text):  # ← было: half[\s-]sovereigns?
+        return "1/2sovereign"
+    if re.search(r"\b½\s*sovereigns?\b", text):
         return "1/2sovereign"
     if re.search(r"\bfull[\s-]sovereigns?\b", text) or re.search(r"\bsovereigns?\b", text):
         return "1sovereign"
@@ -145,7 +147,7 @@ def weight_to_oz(weight: Optional[str]) -> Optional[float]:
         "1/4oz":         0.25,
         "1/10oz":        0.1,
         "1sovereign":    0.2354,
-        "1/2sovereign":  0.1177,
+        "1/2sovereign":  0.1283,
         "1/4sovereign":  0.0589,  # 1.83g gold content / 31.1035
         "2sovereign":    0.4708,
     }
